@@ -9,7 +9,7 @@ on:
 
 jobs:
   lua-lint:
-    runs-on: [self-hosted, windows, skull, lua]
+    runs-on: [self-hosted]
     timeout-minutes: 10
 
     steps:
