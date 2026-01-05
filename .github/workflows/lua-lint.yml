@@ -2,10 +2,14 @@ name: Lua Lint (ESX)
 
 on:
   push:
-    branches: [ main ]
+    branches: main
   pull_request:
     paths:
       - "**/*.lua"
+
+permissions:
+  checks: write
+  contents: read
 
 jobs:
   lua-lint:
@@ -16,18 +20,11 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install LuaCheck
-        shell: powershell
-        run: |
-          luarocks install luacheck
-
-      - name: Run LuaCheck (ESX)
+      - name: Run LuaCheck
         shell: powershell
         run: |
           luacheck . `
             --formatter JUnit `
-            --codes `
-            --globals ESX exports Citizen lib source `
             --output luacheck-report.xml
 
       - name: Publish JUnit Report
