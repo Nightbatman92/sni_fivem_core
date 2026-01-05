@@ -2,14 +2,14 @@ name: Lua Lint (ESX)
 
 on:
   push:
-    branches: [ main, dev ]
+    branches: [ main ]
   pull_request:
     paths:
       - "**/*.lua"
 
 jobs:
   lua-lint:
-    runs-on: [self-hosted]
+    runs-on: self-hosted
     timeout-minutes: 10
 
     steps:
