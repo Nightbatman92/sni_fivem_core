@@ -12,26 +12,26 @@ permissions:
 
 jobs:
   lint:
-    name: Lint Lua Resource
     runs-on: self-hosted
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v6
+      - uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: Run Lua Linter
-        uses: iLLeniumStudios/fivem-lua-lint-action@v2
-        with:
-          capture: "junit.xml"
-          args: "-t --formatter JUnit"
-          extra_libs: mysql
+      - name: Run Luacheck
+        shell: powershell
+        run: |
+          luacheck . ^
+            --config .luacheckrc ^
+            --formatter JUnit ^
+            --codes ^
+            --output junit.xml
 
       - name: Publish Lint Report
         if: always()
         uses: mikepenz/action-junit-report@v6
         with:
-          report_paths: "**/junit.xml"
+          report_paths: "junit.xml"
           check_name: "Lua Lint Report"
           fail_on_failure: false
