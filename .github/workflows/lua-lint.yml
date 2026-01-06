@@ -1,4 +1,4 @@
-name: Lua Lint (ESX)
+name: Lua Lint (FiveM / ESX)
 
 on:
   push:
@@ -12,23 +12,26 @@ permissions:
 
 jobs:
   lint:
+    name: Luacheck (Windows Self-Hosted)
     runs-on: self-hosted
 
     steps:
-      - uses: actions/checkout@v6
+      - name: Checkout repository
+        uses: actions/checkout@v6
         with:
           ref: ${{ github.event.pull_request.head.sha }}
+
+      - name: Verify Luacheck installation
+        shell: powershell
+        run: |
+          luacheck --version
 
       - name: Run Luacheck
         shell: powershell
         run: |
-          luacheck . ^
-            --config .luacheckrc ^
-            --formatter JUnit ^
-            --codes ^
-            --output junit.xml
+          luacheck . --config .luacheckrc --formatter JUnit --codes --output junit.xml
 
-      - name: Publish Lint Report
+      - name: Publish Luacheck Report
         if: always()
         uses: mikepenz/action-junit-report@v6
         with:
