@@ -34,12 +34,17 @@ jobs:
         shell: powershell
         run: |
           Write-Host "Running Luacheck..."
+
           C:\tools\luacheck.exe . `
             --config .luacheckrc `
             --formatter JUnit `
             --codes `
             1> junit.xml `
-            2> luacheck.log || exit 0
+            2> luacheck.log
+
+          if ($LASTEXITCODE -ne 0) {
+            Write-Host "Luacheck completed with warnings (exit code $LASTEXITCODE)"
+          }
 
       - name: Publish Luacheck Report
         if: always()
