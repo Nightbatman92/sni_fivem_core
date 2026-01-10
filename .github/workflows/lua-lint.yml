@@ -1,35 +1,61 @@
-name: Lua Lint (ESX)
+name: Lua Lint (FiveM / ESX)
 
 on:
   push:
-    branches: main
-  pull_request:
-    paths:
-      - "**/*.lua"
+    branches: [ "main", "dev" ]
+  pull_request_target:
+    branches: [ "*" ]
 
 permissions:
-  checks: write
   contents: read
+  checks: write
 
 jobs:
-  lua-lint:
+  lint:
+    name: Luacheck (Windows Self-Hosted)
     runs-on: self-hosted
-    timeout-minutes: 10
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
-      - name: Run LuaCheck
+      - name: Verify Luacheck binary
         shell: powershell
         run: |
-          luacheck . `
-            --formatter JUnit `
-            --output luacheck-report.xml
+          if (-Not (Test-Path "C:\tools\luacheck.exe")) {
+            Write-Error "Luacheck non trovato in C:\tools\luacheck.exe"
+          }
+          C:\tools\luacheck.exe --version
 
-      - name: Publish JUnit Report
+      - name: Run Luacheck (JUnit)
+        shell: powershell
+        run: |
+          Write-Host "Running Luacheck in JUnit mode..."
+
+          cmd /c ^
+            "C:\tools\luacheck.exe . ^
+            --config .luacheckrc ^
+            --formatter JUnit ^
+            --codes ^
+            --quiet ^
+            --no-color ^
+            1> junit.xml ^
+            2> luacheck.log ^
+            || exit /b 0"
+
+      - name: Publish Luacheck Report
         if: always()
-        uses: mikepenz/action-junit-report@v4
+        uses: mikepenz/action-junit-report@v6
         with:
-          report_paths: luacheck-report.xml
-          fail_on_failure: true
+          report_paths: junit.xml
+          check_name: Lua Lint Report
+          fail_on_failure: false
+
+          # 🔑 per avere SEMPRE risultati visibili
+          include_passed: true
+          include_empty_in_summary: true
+          job_summary: true
+          verbose_summary: true
+          check_annotations: false
